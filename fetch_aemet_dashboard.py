@@ -35,17 +35,25 @@ if not API_KEY:
 HEADERS = {"api_key": API_KEY, "Accept": "application/json"}
 
 
-def aemet_get(endpoint, retries=3):
+def aemet_get(endpoint, retries=5):
     """Llama a un endpoint de AEMET.
 
     AEMET responde primero con un JSON pequeño que contiene la URL real de
     los datos (campo 'datos'), así que hace falta una segunda petición para
     obtener el contenido de verdad.
+
+    AEMET limita las peticiones por minuto con la misma clave (HTTP 429).
+    Si se supera el límite, se espera cada vez más tiempo antes de
+    reintentar (10s, 20s, 40s, 60s...), porque el límite tarda hasta un
+    minuto en liberarse.
     """
+    espera = 10
     for intento in range(retries):
         resp = requests.get(f"{BASE_URL}{endpoint}", headers=HEADERS, timeout=30)
         if resp.status_code == 429:
-            time.sleep(3)
+            print(f"Límite de peticiones de AEMET alcanzado, esperando {espera}s (intento {intento + 1}/{retries})...")
+            time.sleep(espera)
+            espera = min(espera * 2, 60)
             continue
         resp.raise_for_status()
         meta = resp.json()
@@ -183,20 +191,39 @@ def main():
     for estacion in STATIONS:
         idema = estacion.get("idema")
         nombre = estacion["nombre"]
+        df_hist, df_pred = pd.DataFrame(), pd.DataFrame()
+
+        # El histórico y la predicción se piden por separado: si uno de los
+        # dos falla (p. ej. por el límite de peticiones de AEMET), el otro
+        # se sigue mostrando en vez de perder todo el bloque de la estación.
         try:
             if not idema:
                 idema, nombre_real = resolver_idema(estacion["busqueda_nombre"])
                 nombre = estacion.get("nombre") or nombre_real
-            print(f"Procesando {nombre} (idema={idema})...")
+            print(f"Procesando histórico de {nombre} (idema={idema})...")
             historico = obtener_historico(idema, DIAS_HISTORICO)
-            prediccion = obtener_prediccion(estacion["municipio"])
             df_hist = historico_a_dataframe(historico)
+        except Exception as exc:
+            print(f"Aviso: no se pudo obtener el histórico de {nombre}: {exc}")
+
+        time.sleep(2)  # pequeña pausa para no encadenar peticiones demasiado rápido
+
+        try:
+            print(f"Procesando predicción de {nombre}...")
+            prediccion = obtener_prediccion(estacion["municipio"])
             df_pred = prediccion_a_dataframe(prediccion)
+        except Exception as exc:
+            print(f"Aviso: no se pudo obtener la predicción de {nombre}: {exc}")
+
+        if df_hist.empty and df_pred.empty:
+            bloques_html.append(
+                f"<p>No se pudieron cargar datos de {nombre} en esta ejecución "
+                "(probablemente el límite de peticiones de AEMET). Se reintentará "
+                "automáticamente en la próxima actualización programada.</p>"
+            )
+        else:
             fig = construir_figura(nombre, df_hist, df_pred)
             bloques_html.append(fig.to_html(full_html=False, include_plotlyjs=False))
-        except Exception as exc:
-            print(f"Error procesando {nombre}: {exc}")
-            bloques_html.append(f"<p>No se pudieron cargar los datos de {nombre}: {exc}</p>")
 
     html = f"""<!DOCTYPE html>
 <html lang="es">
