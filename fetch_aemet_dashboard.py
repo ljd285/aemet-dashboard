@@ -101,7 +101,7 @@ def obtener_historico(idema, dias):
         ini_str = cursor.strftime("%Y-%m-%dT00:00:00UTC")
         fin_str = siguiente.strftime("%Y-%m-%dT23:59:59UTC")
         endpoint = (
-            f"/valores/climatologicos/diariosclimatologicos/"
+            f"/valores/climatologicos/diarios/datos/"
             f"fechaini/{ini_str}/fechafin/{fin_str}/estacion/{idema}"
         )
         try:
