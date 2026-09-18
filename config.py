@@ -15,13 +15,13 @@ https://www.aemet.es/es/eltiempo/prediccion/municipios).
 STATIONS = [
     {
         "nombre": "Valencia",
-        "idema": "8416X",            # Valencia, UPV — fijado a propósito: buscar solo
-                                      # por "VALENCIA" es ambiguo (existen también
-                                      # Valencia de Don Juan, Valencia de Alcántara, etc.)
-        "busqueda_nombre": "VALENCIA, UPV",
+        "idema": "8416",             # València, Viveros — índice climatológico oficial
+                                      # (ver aemet.es/es/serviciosclimaticos/datosclimatologicos/valoresclimatologicos?l=8416).
+                                      # OJO: "8416X" (Valencia, UPV) es una estación distinta
+                                      # sin histórico climatológico diario completo.
+        "busqueda_nombre": "VALENCIA, UPV",  # ya no se usa mientras 'idema' esté fijado arriba
         "municipio": "46250",       # código INE de Valencia capital
     },
-    
     # Ejemplo de cómo añadir otra estación en el futuro:
     # {
     #     "nombre": "Madrid",
