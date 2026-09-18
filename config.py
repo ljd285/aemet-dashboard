@@ -15,10 +15,13 @@ https://www.aemet.es/es/eltiempo/prediccion/municipios).
 STATIONS = [
     {
         "nombre": "Valencia",
-        "idema": None,              # se detecta automáticamente
-        "busqueda_nombre": "VALENCIA",
+        "idema": "8416X",            # Valencia, UPV — fijado a propósito: buscar solo
+                                      # por "VALENCIA" es ambiguo (existen también
+                                      # Valencia de Don Juan, Valencia de Alcántara, etc.)
+        "busqueda_nombre": "VALENCIA, UPV",
         "municipio": "46250",       # código INE de Valencia capital
     },
+    
     # Ejemplo de cómo añadir otra estación en el futuro:
     # {
     #     "nombre": "Madrid",
