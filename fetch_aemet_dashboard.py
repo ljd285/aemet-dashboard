@@ -81,10 +81,18 @@ def resolver_idema(busqueda_nombre):
 def obtener_historico(idema, dias):
     """Descarga los valores climatológicos diarios de los últimos `dias` días.
 
-    AEMET limita cada petición a un máximo de ~1 año, así que se trocea el
-    rango si hiciera falta (por defecto no hace falta, con 90 días).
+    Los valores diarios de AEMET pasan por un proceso de validación antes de
+    publicarse, así que los últimos días no están disponibles todavía y una
+    petición cuyo rango llegue hasta "hoy" falla por completo (404) en vez
+    de devolver solo lo que sí existe. Por eso se aplica un margen de
+    seguridad (MARGEN_DIAS) y el rango termina unos días antes de hoy.
+
+    AEMET limita además cada petición a un máximo de ~1 año, así que se
+    trocea el rango si hiciera falta (por defecto no hace falta, con 90
+    días).
     """
-    fecha_fin = datetime.utcnow()
+    MARGEN_DIAS = 5
+    fecha_fin = datetime.utcnow() - timedelta(days=MARGEN_DIAS)
     fecha_ini = fecha_fin - timedelta(days=dias)
     registros = []
     cursor = fecha_ini
