@@ -3,7 +3,7 @@ name: Actualizar dashboard AEMET
 on:
   schedule:
     # Todos los días a las 06:00 UTC (08:00 en Valencia en horario de verano)
-    - cron: "0 6, 12, 18 * * *"
+    - cron: "0 6,12,18,00 * * *"
   workflow_dispatch: {}   # permite lanzarlo manualmente desde la pestaña Actions
 
 permissions:
