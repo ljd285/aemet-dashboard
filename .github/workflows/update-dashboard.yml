@@ -1,0 +1,36 @@
+name: Actualizar dashboard AEMET
+
+on:
+  schedule:
+    # Todos los días a las 06:00 UTC (08:00 en Valencia en horario de verano)
+    - cron: "0 6 * * *"
+  workflow_dispatch: {}   # permite lanzarlo manualmente desde la pestaña Actions
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Generar el dashboard
+        env:
+          AEMET_API_KEY: ${{ secrets.AEMET_API_KEY }}
+        run: python fetch_aemet_dashboard.py
+
+      - name: Publicar en GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
