@@ -15,7 +15,7 @@ https://www.aemet.es/es/eltiempo/prediccion/municipios).
 STATIONS = [
     {
         "nombre": "Valencia",
-        "idema": "8416",            # Valencia, UPV — fijado a propósito: buscar solo
+        "idema": "8416X",            # Valencia, UPV — fijado a propósito: buscar solo
                                       # por "VALENCIA" es ambiguo (existen también
                                       # Valencia de Don Juan, Valencia de Alcántara, etc.)
         "busqueda_nombre": "VALENCIA, UPV",
